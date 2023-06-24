@@ -1,0 +1,29 @@
+{% extends 'base_generic2.html' %}
+
+{% block title %}
+Add a new contact
+{% endblock %}
+
+{% block content %}
+<div class="centered">
+    <h2>Add a new contact</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit</button>
+    </form>
+
+    {% if form.errors %}
+        <ul>
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <li><strong>{{ field.label }}:</strong> {{ error|escape }}</li>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <li><strong>General error:</strong> {{ error|escape }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+{% endblock %}

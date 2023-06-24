@@ -1,0 +1,17 @@
+{% extends 'base_generic2.html' %}
+
+{% block title %}
+Edit Contact
+{% endblock %}
+
+{% block content %}
+<div class="centered">
+    <h1>Edit Contact</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Update</button>
+    </form>
+    <a href="{% url 'dashboard' %}">Back to Dashboard</a>
+</div>
+{% endblock %}

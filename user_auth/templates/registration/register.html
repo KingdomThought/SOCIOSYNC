@@ -1,0 +1,41 @@
+{% extends 'base_generic.html' %}
+
+{% block title %}
+    Register
+{% endblock %}
+
+{% block content %}
+    <div class="main">
+        <div class="centered">
+            <h2>Register</h2>
+            <form method="post">
+                {% csrf_token %}
+                <div>
+                    <label for="{{ form.username.id_for_label }}">Username</label><br>
+                    {{ form.username }}
+                    <small id="usernameHelp" class="form-text text-muted"></small>
+                </div>
+                <div>
+                    <label for="{{ form.email.id_for_label }}">Email</label><br>
+                    {{ form.email }}
+                </div>
+                <div>
+                    <label for="{{ form.first_name.id_for_label }}">First Name</label><br>
+                    {{ form.first_name }}
+                </div>
+                <div>
+                    <label for="{{ form.password1.id_for_label }}">Password</label><br>
+                    {{ form.password1 }}
+                </div>
+                <div>
+                    <label for="{{ form.password2.id_for_label }}">Password Confirmation</label><br>
+                    {{ form.password2 }}
+                </div>
+                <button type="submit">Register</button>
+            </form>
+            <p>
+                <a href="{% url 'password_reset' %}">Forgot your password? Click Here</a>
+            </p>
+        </div>
+    </div>
+{% endblock %}

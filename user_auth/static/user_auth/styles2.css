@@ -1,0 +1,43 @@
+header {
+    background-color: #f2f2f2;
+    padding: 10px;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    flex: 1;
+}
+
+.logo img {
+    max-height: 50px;
+}
+
+.menu ul {
+    display: flex;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.menu li {
+    margin-right: 15px;
+}
+
+.menu li.logout {
+    margin-left: auto;
+}
+
+.menu li a {
+    color: #333;
+    text-decoration: none;
+}
+
+.menu li a:hover {
+    color: #000;
+    font-weight: bold;
+}
