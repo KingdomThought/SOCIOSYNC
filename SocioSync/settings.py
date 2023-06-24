@@ -37,7 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'user_auth.apps.UserAuthConfig',
+    'django_crontab',
+]
 
+
+CRONJOBS = [
+    ('* * * * *', 'contact_management.management.commands.send_reminders'), # Runs every hour
 ]
 
 AUTH_USER_MODEL = 'user_auth.CustomUser'

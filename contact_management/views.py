@@ -1,15 +1,3 @@
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
-from django.urls import reverse_lazy
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from .models import Contact
-
-from django.views import View
-from django.core.mail import send_mail
-from django.utils.timezone import now
-from .models import Contact
-
-
 from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from contact_management.models import Contact, Reminder
@@ -18,6 +6,13 @@ from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 
 
+from django.views.generic.edit import CreateView
+from django.urls import reverse_lazy
+from django.http import HttpResponseRedirect
+
+from dateutil.relativedelta import relativedelta
+from datetime import timedelta
+
 class AddNewContactView(CreateView):
     model = Contact
     form_class = ContactForm
@@ -25,44 +20,50 @@ class AddNewContactView(CreateView):
 
     def form_valid(self, form):
         form.instance.user = self.request.user
-        # Temporarily save contact instance to get id for the Reminder instances
         self.object = form.save(commit=False)
 
         contact = self.object
-
         delta = contact.get_frequency_delta()
 
         if delta is None:
-            return super().form_valid(form)  # For other frequencies, no reminders are created.
+            return super().form_valid(form)
+
+        now = timezone.now()
 
         reminders = []
-        if contact.frequency != 'Daily':
-            for i in range(3):
-                reminders.append(Reminder(
-                    contact=contact,
-                    date_time=timezone.now() + (i + 1) * delta / 3,
-                    position=i,  # Assign position here
-                ))
-        else:
-            reminders.append(Reminder(
-                contact=contact,
-                date_time=timezone.now() + delta,
-                position=0,  # Assign position here
-            ))
+        reminders.append(Reminder(
+            contact=contact,
+            date_time=now,  # Set first reminder at the moment of creation
+            position=0,
+        ))
 
-        # Set the next reminder for the contact
+        # Calculate the exact midpoint
+        if contact.frequency in ['Daily', 'Weekly', 'Bi-weekly']:
+            mid_cycle = now + delta / 2
+        else:
+            # For other frequencies, we calculate the exact midpoint
+            end_cycle = now + delta
+            mid_cycle = now + (end_cycle - now) / 2
+
+        reminders.append(Reminder(
+            contact=contact,
+            date_time=mid_cycle,  # Set second reminder at the calculated mid point of the cycle
+            position=1,
+        ))
+
         contact.next_reminder = min(r.date_time for r in reminders)
 
-        # Now save the contact instance
         self.object.save()
 
-        # Save all the reminders after the contact is saved
         for reminder in reminders:
             reminder.save()
 
         return HttpResponseRedirect(self.get_success_url())
 
     success_url = reverse_lazy('dashboard')
+
+
+
 
 
 
@@ -84,20 +85,28 @@ class ContactUpdateView(UpdateView):
         # Delete existing reminders
         contact.reminder_set.all().delete()
 
+        now = timezone.now()
+
         reminders = []
-        if contact.frequency != 'Daily':
-            for i in range(3):
-                reminders.append(Reminder(
-                    contact=contact,
-                    date_time=timezone.now() + (i + 1) * delta / 3,
-                    position=i,
-                ))
+        reminders.append(Reminder(
+            contact=contact,
+            date_time=now,  # Set first reminder at the moment of update
+            position=0,
+        ))
+
+        # Calculate the exact midpoint
+        if contact.frequency in ['Daily', 'Weekly', 'Bi-weekly']:
+            mid_cycle = now + delta / 2
         else:
-            reminders.append(Reminder(
-                contact=contact,
-                date_time=timezone.now() + delta,
-                position=0,
-            ))
+            # For other frequencies, we calculate the exact midpoint
+            end_cycle = now + delta
+            mid_cycle = now + (end_cycle - now) / 2
+
+        reminders.append(Reminder(
+            contact=contact,
+            date_time=mid_cycle,  # Set second reminder at the calculated mid point of the cycle
+            position=1,
+        ))
 
         # Save the new reminders
         for reminder in reminders:
@@ -120,5 +129,3 @@ class ContactDeleteView(DeleteView):
         return super().delete(request, *args, **kwargs)
 
     success_url = reverse_lazy('dashboard')  # Pointing to the dashboard view in the auth_user app
-
-
