@@ -13,15 +13,19 @@ from django import forms
 from .forms import CustomUserCreationForm
 from contact_management.models import Contact
 from .models import CustomUser
+from django.core.paginator import Paginator
 
 
 @login_required
 def dashboard_view(request):
-    user = request.user
-    contacts = Contact.objects.filter(user=user)
-    context = {'user': user, 'contacts': contacts}
-    return render(request, 'dashboard.html', context)
+    # Get only the contacts created by the logged-in user
+    contact_list = Contact.objects.filter(user=request.user)
+    paginator = Paginator(contact_list, 10)  # Show 10 contacts per page.
 
+    page_number = request.GET.get('page')
+    contacts = paginator.get_page(page_number)
+
+    return render(request, 'dashboard.html', {'contacts': contacts})
 
 # Login Registration Authentication and Logout
 def register(request):
