@@ -13,8 +13,7 @@ logger = logging.getLogger(__name__)
 
 @shared_task
 def send_reminders_task():
-    reminders_for_today = Reminder.objects.filter(date_time__date=timezone.now().date(), sent=False).select_related(
-        'contact')
+    reminders_for_today = Reminder.objects.filter(date_time__date=timezone.now().date(), sent=False).select_related('contact')
 
     for reminder in reminders_for_today:
         contact = reminder.contact
@@ -24,8 +23,6 @@ def send_reminders_task():
             email_content = f"It's time to contact {contact.name}! Remember, you planned to reach out to them regularly."
         elif reminder_position == 1:  # Second reminder
             email_content = f"Just a reminder to contact {contact.name} soon."
-        else:  # Third reminder
-            email_content = f"Final reminder: don't forget to contact {contact.name} as you planned."
 
         email = EmailMessage(
             'Contact Reminder',
@@ -41,9 +38,6 @@ def send_reminders_task():
                 email.send(fail_silently=False)
                 reminder.sent = True
                 reminder.save()
-
-                if reminder_position == 1:
-                    reset_reminders(contact)
                 break
             except Exception as e:
                 logger.error(f"Attempt {i + 1} failed to send email for contact {contact.id}: {e}")
@@ -58,7 +52,6 @@ def send_reminders_task():
                         )
                     except:
                         logger.error(f"Failed to send error email to admin for contact {contact.id}: {e}")
-
 
 def reset_reminders(contact):
     delta = contact.get_frequency_delta()

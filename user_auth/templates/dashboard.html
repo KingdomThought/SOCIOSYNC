@@ -1,9 +1,17 @@
 {% extends "base_generic2.html" %}
 
+{% load static %}  <!-- Remember to load static to use static files -->
+
 {% block content %}
     <!-- Banner Area -->
+
     <div class="banner text-center">
-        <h1 class="display-4">Socio Sync</h1>
+    <!--    <h1 class="display-4">Socio Sync</h1>
+-->
+
+        <!-- Logo placement with width set to a relative value -->
+        <img src="{% static 'user_auth/img/logo.png' %}" alt="Logo" style="width: 15%;">
+
     </div>
 
     <h2 class="text-center">Hello {{ user.username }}, Welcome</h2>
